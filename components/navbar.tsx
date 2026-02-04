@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Search, Calendar, Bell, ChevronDown, Star } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -24,7 +24,7 @@ const navigationItems = [
 ];
 
 export function Navbar() {
-  const [activeItem, setActiveItem] = useState('Dashboard');
+  const pathname = usePathname();
   const notificationCount = 3;
 
   return (
@@ -51,22 +51,25 @@ export function Navbar() {
           </div>
 
           <div className="hidden items-center gap-1 lg:flex">
-            {navigationItems.map((item) => (
-              <button
-                key={item.name}
-                onClick={() => setActiveItem(item.name)}
-                className={`relative px-4 py-2 text-sm font-medium transition-colors ${
-                  activeItem === item.name
-                    ? 'text-gray-900'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                {item.name}
-                {activeItem === item.name && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-yellow-400 to-yellow-500" />
-                )}
-              </button>
-            ))}
+            {navigationItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`relative px-4 py-2 text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'text-gray-900'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  {item.name}
+                  {isActive && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-yellow-400 to-yellow-500" />
+                  )}
+                </Link>
+              );
+            })}
           </div>
         </div>
 

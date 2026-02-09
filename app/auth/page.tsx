@@ -1,51 +1,19 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
-import { useAuth } from '@/components/auth/auth-provider';
 import { PageShell } from '@/components/page-shell';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-
-const signInSchema = z.object({
-  email: z.string().email('Enter a valid email address.'),
-  password: z
-    .string()
-    .min(8, 'Password must be at least 8 characters.')
-    .max(128, 'Password must be under 128 characters.'),
-});
-
-type SignInValues = z.infer<typeof signInSchema>;
+import { useAuth } from '@/components/auth/auth-provider';
+import { getBackendUrl } from '@/lib/env';
 
 export default function AuthPage() {
-  const { status, session, login, logout, error } = useAuth();
-  const router = useRouter();
+  const { status, session, logout } = useAuth();
   const isLoading = status === 'loading';
-
-  const form = useForm<SignInValues>({
-    resolver: zodResolver(signInSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-    mode: 'onTouched',
-  });
+  const backendUrl = getBackendUrl();
+  const loginUrl = backendUrl ? `${backendUrl}/auth/login` : '/auth/login';
 
   const sessionDetails = useMemo(
     () =>
@@ -54,15 +22,6 @@ export default function AuthPage() {
         : 'No active session',
     [session]
   );
-
-  const onSubmit = async (values: SignInValues) => {
-    try {
-      await login(values.email, values.password);
-      router.push('/dashboard');
-    } catch {
-      // handled in auth provider
-    }
-  };
 
   return (
     <PageShell
@@ -77,67 +36,19 @@ export default function AuthPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Form {...form}>
-              <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email address</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="email"
-                          placeholder="you@company.com"
-                          autoComplete="email"
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Use your work email to access the platform.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="password"
-                          placeholder="Enter your password"
-                          autoComplete="current-password"
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Never share your password. Use 8+ characters.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {error ? (
-                  <Alert variant="destructive">
-                    <AlertTitle>Unable to sign in</AlertTitle>
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                ) : null}
-
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Signing in…' : 'Sign in'}
-                </Button>
-              </form>
-            </Form>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600">
+                Use your Microsoft account to securely access the platform.
+              </p>
+              <Button className="w-full" disabled={isLoading} asChild>
+                <a href={loginUrl}>
+                  {isLoading ? 'Connecting…' : 'Continue with Microsoft'}
+                </a>
+              </Button>
+              <p className="text-xs text-gray-500">
+                You will be redirected to Microsoft for authentication.
+              </p>
+            </div>
           </CardContent>
         </Card>
         <div className="space-y-4">

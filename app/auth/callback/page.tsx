@@ -45,6 +45,12 @@ export default function AuthCallbackPage() {
       return;
     }
 
+    if (!window.location.search) {
+      setMessage('Redirecting you to Microsoft sign-in…');
+      window.location.assign(`${backendUrl}/auth/login`);
+      return;
+    }
+
     const finalize = async () => {
       try {
         const response = await fetch(callbackUrl, {
